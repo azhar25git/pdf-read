@@ -21,10 +21,8 @@ trait CreatesApplication
 
     /**
      * Creates the application.
-     *
-     * @return \Illuminate\Foundation\Application
      */
-    public static function createApplicationStatic() : Application
+    public static function createApplicationStatic(): Application
     {
         $app = require __DIR__.'/../bootstrap/app.php';
 

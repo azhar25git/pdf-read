@@ -8,16 +8,18 @@ use Illuminate\Support\Str;
 
 class SkodaPdfAssistant extends PdfClient
 {
-    public static function validateFormat (array $lines) {
+    public static function validateFormat(array $lines)
+    {
         return Str::startsWith($lines[0], 'DATUM: ')
-            && $lines[2] == "NÁLOŽNÍ LIST / VERLADESCHEIN / LOADING LIST"
-            && $lines[4] == "ODBĚRATEL / ABNEHMER / CUSTOMER NO."
-            && Str::startsWith($lines[19], "Š k o d a");
+            && $lines[2] == 'NÁLOŽNÍ LIST / VERLADESCHEIN / LOADING LIST'
+            && $lines[4] == 'ODBĚRATEL / ABNEHMER / CUSTOMER NO.'
+            && Str::startsWith($lines[19], 'Š k o d a');
     }
 
-    public function processLines (array $lines, ?string $attachment_filename = null) {
-        if (!static::validateFormat($lines)) {
-            throw new \Exception("Invalid Skoda PDF");
+    public function processLines(array $lines, ?string $attachment_filename = null)
+    {
+        if (! static::validateFormat($lines)) {
+            throw new \Exception('Invalid Skoda PDF');
         }
 
         $customer_number = $lines[5];
@@ -35,7 +37,7 @@ class SkodaPdfAssistant extends PdfClient
         ];
 
         preg_match('/DATUM: ([0-9\.]+)/', $lines[0], $date_match);
-        $loading_date = Carbon::createFromFormat('d.m.Y', $date_match[1])->addDays(1)->setTime(0,0,0,0)->toIsoString();
+        $loading_date = Carbon::createFromFormat('d.m.Y', $date_match[1])->addDays(1)->setTime(0, 0, 0, 0)->toIsoString();
 
         $loading_locations = [[
             'company_address' => $customer['details'],
@@ -45,7 +47,7 @@ class SkodaPdfAssistant extends PdfClient
         ]];
 
         $destination_locations = [[
-            'company_address' => $this->processCompanyAddress($lines[7], $lines[9], $lines[10])
+            'company_address' => $this->processCompanyAddress($lines[7], $lines[9], $lines[10]),
         ]];
 
         $attachment_filenames = [mb_strtolower($attachment_filename ?? '')];
@@ -67,17 +69,18 @@ class SkodaPdfAssistant extends PdfClient
         $this->createOrder($data);
     }
 
-    public function processCompanyAddress (string $line1, string $line2, string $line3) {
+    public function processCompanyAddress(string $line1, string $line2, string $line3)
+    {
         preg_match('/^(.*?),?\s*(([A-Z]{2})?[- ]*[0-9-]{4,}?)$/u', $line2, $street_post);
-        if (!$street_post) {
+        if (! $street_post) {
             throw new \Exception("Invalid Skoda PDF: wrong company address [{$line1}], [{$line2}], [{$line3}]");
         }
 
         $street = $street_post[1];
         $postal_code = $street_post[2];
-        
+
         preg_match('/^(.*?)\s+(\w+)$/u', $line3, $city_country);
-        if (!$city_country) {
+        if (! $city_country) {
             throw new \Exception("Invalid Skoda PDF: wrong company address [{$line1}], [{$line2}], [{$line3}]");
         }
         $city = $city_country[1];
@@ -94,18 +97,19 @@ class SkodaPdfAssistant extends PdfClient
         ];
     }
 
-    public function extractCargos (array $lines) : array {
+    public function extractCargos(array $lines): array
+    {
         $divider_regex = '/^_+$/';
         $number_title_regex = '(\w+?)\s+(.*?)';
         $dims_regex = '([0-9,\.]+)[\sx]+([0-9,\.]+)[\sx]+([0-9,\.]+)';
 
-        $start_index = array_find_key($lines, fn($l) => preg_match($divider_regex, $l));
-        $end_index = array_find_key($lines, fn($l, $i) => $i > $start_index && preg_match($divider_regex, $l));
+        $start_index = array_find_key($lines, fn ($l) => preg_match($divider_regex, $l));
+        $end_index = array_find_key($lines, fn ($l, $i) => $i > $start_index && preg_match($divider_regex, $l));
 
-        if (!$start_index
-            || $lines[$start_index - 1] !== "NETTO"
+        if (! $start_index
+            || $lines[$start_index - 1] !== 'NETTO'
         ) {
-            throw new \Exception("Invalid Skoda PDF: wrong cargo formatting");
+            throw new \Exception('Invalid Skoda PDF: wrong cargo formatting');
         }
 
         $cargos = [];
@@ -113,7 +117,7 @@ class SkodaPdfAssistant extends PdfClient
         $i = $start_index + 1;
         while ($i < $end_index) {
             $add_lines = 0;
-            
+
             $cargo = [];
             if (preg_match("/^({$number_title_regex})\s+({$dims_regex})$/u", $lines[$i], $joined)) {
                 $number_title_line = $joined[1];
@@ -122,18 +126,18 @@ class SkodaPdfAssistant extends PdfClient
             } else {
                 $number_title_line = $lines[$i];
                 $dims_line = $lines[$i + 1];
-                
+
             }
 
             preg_match("/^{$number_title_regex}$/u", $number_title_line, $number_title);
             if ($number_title) {
                 $cargo['number'] = $number_title[1];
-                $cargo['title']  = $number_title[2];
+                $cargo['title'] = $number_title[2];
             }
 
             preg_match("/^{$dims_regex}$/u", $dims_line, $dims);
             if ($dims) {
-                $cargo['pkg_width']  = uncomma($dims[1]) / 100;
+                $cargo['pkg_width'] = uncomma($dims[1]) / 100;
                 $cargo['pkg_length'] = uncomma($dims[2]) / 100;
                 $cargo['pkg_height'] = uncomma($dims[3]) / 100;
             }
@@ -144,7 +148,7 @@ class SkodaPdfAssistant extends PdfClient
             $cargo['weight'] = uncomma($lines[$i + 2 + $add_lines]);
 
             $cargo['package_count'] = 1;
-            $cargo['package_type'] = "other";
+            $cargo['package_type'] = 'other';
 
             $cargos[] = $cargo;
 

@@ -2,13 +2,10 @@
 
 namespace App\Assistants;
 
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Helper;
+use Opis\JsonSchema\Validator;
 use Spatie\PdfToText\Pdf;
-use Opis\JsonSchema\{
-    Helper,
-    Validator,
-    ValidationResult,
-    Errors\ErrorFormatter,
-};
 
 abstract class PdfClient
 {
@@ -16,21 +13,21 @@ abstract class PdfClient
 
     /**
      * Checks if the given file contents match the format of this class.
-     * 
-     * @param array $lines  plain text lines extracted from PDF
+     *
+     * @param  array  $lines  plain text lines extracted from PDF
      */
-    abstract public static function validateFormat (array $lines);
+    abstract public static function validateFormat(array $lines);
 
-    
     /**
      * Generates a structured output from PDF file contents.
-     * 
-     * @param array $lines  plain text lines extracted from PDF
-     * @param string|null $attachment_filename  filename of the PDF
+     *
+     * @param  array  $lines  plain text lines extracted from PDF
+     * @param  string|null  $attachment_filename  filename of the PDF
      */
-    abstract public function processLines (array $lines, ?string $attachment_filename = null);
+    abstract public function processLines(array $lines, ?string $attachment_filename = null);
 
-    public function createOrder (array $data) {
+    public function createOrder(array $data)
+    {
         $json = Helper::toJSON($data);
 
         $result = $this->getValidator()
@@ -40,12 +37,13 @@ abstract class PdfClient
             $this->output = $data;
         } else {
             echo json_encode($json);
-            $errors = json_encode((new ErrorFormatter())->format($result->error()));
+            $errors = json_encode((new ErrorFormatter)->format($result->error()));
             throw new \Exception($errors);
         }
     }
 
-    public function processPath (string $filename) {
+    public function processPath(string $filename)
+    {
         $lines = $this->extractLocalPdfLines($filename);
 
         $this->processLines($lines, basename($filename));
@@ -53,11 +51,13 @@ abstract class PdfClient
         return $this->getOutput();
     }
 
-    public function getOutput() {
+    public function getOutput()
+    {
         return $this->output;
     }
 
-    public static function extractPdfLines ($file_content) : array {
+    public static function extractPdfLines($file_content): array
+    {
         $temp_file = tempnam(sys_get_temp_dir(), 'pdf-to-text');
         $file = fopen($temp_file, 'w');
         fwrite($file, $file_content);
@@ -68,21 +68,23 @@ abstract class PdfClient
         return $lines;
     }
 
-    public static function extractLocalPdfLines (string $filename) : array {
+    public static function extractLocalPdfLines(string $filename): array
+    {
         $text = (new Pdf(env('PDFTOTEXT_PATH', 'pdftotext')))
             ->setPdf($filename)
             ->text();
 
-        $text = str_replace("\f", "", $text);
+        $text = str_replace("\f", '', $text);
 
         return explode("\n", $text);
     }
 
-    protected function getValidator() : Validator {
-        $validator = new Validator();
+    protected function getValidator(): Validator
+    {
+        $validator = new Validator;
 
         $validator->resolver()->registerFile(
-            'http://localhost/order.json', 
+            'http://localhost/order.json',
             storage_path('order_schema.json')
         );
 
