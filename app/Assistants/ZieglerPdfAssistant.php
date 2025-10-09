@@ -270,7 +270,7 @@ class ZieglerPdfAssistant extends PdfClient
             : Carbon::parse($hourString)->format('H'));
     }
 
-    protected function extractPostalAndCity(string $address)
+    protected function extractPostalAndCity(string $address): array
     {
         // remove commas and extra spaces
         $address = preg_replace('/\s+/', ' ', str_replace(',', '', trim($address)));
@@ -282,10 +282,10 @@ class ZieglerPdfAssistant extends PdfClient
             // remove postal from address → remaining part is city
             $city = trim(str_ireplace($postal, '', $address));
         } else {
-            $postal = null;
+            $postal = '';
             $city = strtoupper($address);
         }
 
-        return [Str::replace(',', '', $postal), Str::replace(',', '', $city)];
+        return [$postal, $city];
     }
 }
