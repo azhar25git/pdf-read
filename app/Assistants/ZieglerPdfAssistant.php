@@ -56,7 +56,18 @@ class ZieglerPdfAssistant extends PdfClient
 
         [$loading_locations, $cargos] = $this->extractLoadingLocations($this->findAllLines('Collection', exactMatch: true));
 
-        $destination_locations = $this->extractDestinationLocations($this->findAllLines('Delivery', exactMatch: true));
+        $clearance_locations = $this->extractDestinationLocations($this->findAllLines('Clearance', exactMatch: true));
+
+        foreach ($clearance_locations as &$loc) {
+            $loc['company_address']['comment'] = 'clearance';
+        }
+
+        $delivery_locations = $this->extractDestinationLocations($this->findAllLines('Delivery', exactMatch: true));
+
+        foreach ($delivery_locations as &$loc) {
+            $loc['company_address']['comment'] = 'delivery';
+        }
+        $destination_locations = array_merge($clearance_locations, $delivery_locations);
 
         $order_reference_line = $this->findLine('Ziegler Ref');
         $order_reference = $this->lines[$order_reference_line + 1];
