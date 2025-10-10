@@ -79,16 +79,6 @@ class ZieglerPdfAssistant extends PdfClient
         $freight_price = uncomma(preg_replace('/[^0-9.]/', '', $this->lines[$freight_price_line + 1]));
         $freight_currency = 'EUR';
 
-        $data = [
-            'attachment_filenames' => $attachment_filenames,
-            'customer' => $customer,
-            'loading_locations' => $loading_locations,
-            'destination_locations' => $destination_locations,
-            'cargos' => $cargos,
-            'order_reference' => $order_reference,
-            'customer_number' => $customer_number,
-        ];
-
         $data = compact(
             'attachment_filenames',
             'customer',
@@ -96,6 +86,7 @@ class ZieglerPdfAssistant extends PdfClient
             'destination_locations',
             'cargos',
             'order_reference',
+            'customer_number',
             'freight_price',
             'freight_currency'
         );
