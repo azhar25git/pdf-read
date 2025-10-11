@@ -6,23 +6,23 @@
 
 3. copy file `.env.example` to `.env`
 
-3. install Poppler
+4. install Poppler
     - see instructions at https://github.com/spatie/pdf-to-text?tab=readme-ov-file#requirements
     - for Windows, see https://github.com/oschwartz10612/poppler-windows
     - if using a custom installation of Poppler, edit the `.env` file and change the
       `PDFTOTEXT_PATH` variable to point to the `pdftotext` executable
 
-4. run:
+5. run:
 ```shell
 composer install
 ```
 
-5. start Tinker console:
+6. start Tinker console:
 ```shell
 php artisan tinker
 ```
 
-6. run commands in tinker:
+7. run commands in tinker:
 ```shell
 process_pdf('storage/pdf_client_test/ZieglerPdfAssistant_1.pdf')
 process_pdf('storage/pdf_client_test/ZieglerPdfAssistant_2.pdf')
