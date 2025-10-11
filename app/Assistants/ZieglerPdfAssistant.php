@@ -109,15 +109,15 @@ class ZieglerPdfAssistant extends PdfClient
             }
 
             $city_postcode_line = (
-                ($this->findLine('Collection', $linesIndex + 1, exactMatch: true)
-                ?? $this->findLine('Clearance', $linesIndex + 1, exactMatch: true)
-                ?? $this->findLine('Delivery', $linesIndex + 1, exactMatch: true)) - 1
+                ($this->findLine('Collection', $linesIndex + 2, exactMatch: true)
+                ?? $this->findLine('Clearance', $linesIndex + 2, exactMatch: true)
+                ?? $this->findLine('Delivery', $linesIndex + 2, exactMatch: true)) - 1
             );
             [$postal, $city] = $this->extractPostalAndCity($this->lines[$city_postcode_line]);
 
             $locationResults[$i]['company_address'] = [
                 'company' => $this->lines[$linesIndex + 1],
-                'street_address' => $this->lines[$street_address_line] ?? '',
+                'street_address' => $this->lines[$street_address_line] ?? $this->lines[$linesIndex + 3] ?? '',
                 'city' => $city,
                 'postal_code' => $postal,
                 'country' => 'GB',
@@ -145,7 +145,7 @@ class ZieglerPdfAssistant extends PdfClient
                 $cargo_line = $this->findLine('PICK UP', $linesIndex + 1, $linesIndex + 9);
                 $cargo['package_type'] = 'other';
             } else {
-                $cargo['package_count'] = (int) explode(' ', $this->lines[$cargo_line])[0];
+                $cargo['package_count'] = uncomma(explode(' ', $this->lines[$cargo_line])[0]);
                 $cargo['package_type'] = 'pallet';
             }
 

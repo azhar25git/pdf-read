@@ -104,6 +104,7 @@ class TransalliancePdfAssistant extends PdfClient
             $cargo['ldm'] = uncomma(Str::replace(' ', '', $this->lines[$cargo_line + 2]));
             $cargo['weight'] = uncomma(Str::replace(' ', '', $this->lines[$cargo_line + 3]));
             $cargo['package_type'] = 'other';
+            $cargo['package_count'] = 1;
 
             $cargoResults[$i] = $cargo;
         }
