@@ -22,7 +22,14 @@ composer install
 php artisan tinker
 ```
 
-
+6. run commands in tinker:
+```shell
+process_pdf('storage/pdf_client_test/ZieglerPdfAssistant_1.pdf')
+process_pdf('storage/pdf_client_test/ZieglerPdfAssistant_2.pdf')
+process_pdf('storage/pdf_client_test/TransalliancePdfAssistant_1.pdf')
+process_pdf('storage/pdf_client_test/TransalliancePdfAssistant_2.pdf')
+```
+  
 ====================================================================================================
 
 # THE GOAL
