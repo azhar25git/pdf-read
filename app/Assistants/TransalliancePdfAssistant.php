@@ -33,7 +33,7 @@ class TransalliancePdfAssistant extends PdfClient
         $this->lines = array_values(array_filter(array_map('trim', $lines)));
 
         if (! static::validateFormat($lines)) {
-            throw new \Exception('Invalid Ziegler PDF');
+            throw new \Exception('Invalid Transalliance PDF');
         }
 
         $attachment_filenames = [mb_strtolower($attachment_filename ?? '')];
